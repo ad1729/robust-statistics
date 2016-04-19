@@ -1,9 +1,9 @@
-rm(list = ls())
-#setwd("C:/Users/frauke/Dropbox/2e/Robust statistics/Project")
-
-source('DO_code_clean.R')
-source('classificationcode.R')
-# library(geometry)
+# rm(list = ls())
+# #setwd("C:/Users/frauke/Dropbox/2e/Robust statistics/Project")
+# 
+# source('DO_code_clean.R')
+# source('classificationcode.R')
+library(geometry)
 library(mrfDepthLight)
 library(ggplot2)
 library(class)
@@ -39,7 +39,7 @@ for (i in 1:n_sim) {
     # generate outliers for 0, 0.01, 0.05, 0.1
     outliers <- sample(1:n_obs, epsilon*n_obs)
     
-    g1[outliers,] <- mvrnorm(n= length(outliers), mu = rep(10, 2), Sigma = matrix(c(1, 0, 0, 1), 2, 2))
+    g1[outliers,] <- mvrnorm(n = length(outliers), mu = rep(10, 2), Sigma = matrix(c(1, 0, 0, 1), 2, 2))
     g2_1[outliers] = rexp(n = length(outliers), rate = 12)
     g2_2[outliers] = rexp(n = length(outliers), rate = 12)
     
@@ -73,16 +73,19 @@ for (i in 1:n_sim) {
     accuracy <- rep(0, 10)
     k <- 1:10
     
-    for(x in k){
-        prediction <- knn(dist_sdo[train_ix, c(1, 2)], dist_sdo[-train_ix, c(1, 2)],
-                          dist_sdo[train_ix, 3], k = x)
-        accuracy[x] <- mean(prediction == dist_sdo[-train_ix, 3])
+    for (x in k) {
+      prediction <- knn(dist_sdo[train_ix, c(1, 2)], 
+                        dist_sdo[-train_ix, c(1, 2)],
+                        dist_sdo[train_ix, 3], k = x)
+      accuracy[x] <- mean(prediction == dist_sdo[-train_ix, 3])
     }
     # plot(k, accuracy, type = 'b')
     
     k_best = which.max(accuracy)
     
-    sdo_class = knn(dist_sdo[train_ix, c(1, 2)], dist_sdo[-train_ix, c(1, 2)], dist_sdo[train_ix, 3],
+    sdo_class = knn(dist_sdo[train_ix, c(1, 2)], 
+                    dist_sdo[-train_ix, c(1, 2)], 
+                    dist_sdo[train_ix, 3],
                     k = k_best)
     # summary(sdo_class)
     
@@ -109,15 +112,20 @@ for (i in 1:n_sim) {
     accuracy <- rep(0, 10)
     k <- 1:10
     
-    for(x in k){
-        prediction <- knn(dist_ao[train_ix, c(1, 2)], dist_ao[-train_ix, c(1, 2)],
-                          dist_ao[train_ix, 3], k = x)
-        accuracy[x] <- mean(prediction == dist_ao[-train_ix, 3])
+    for (x in k) {
+      
+      prediction <- knn(dist_ao[train_ix, c(1, 2)], 
+                        dist_ao[-train_ix, c(1, 2)],
+                        dist_ao[train_ix, 3], k = x)
+      
+      accuracy[x] <- mean(prediction == dist_ao[-train_ix, 3])
     }
     
     k_best = which.max(accuracy)   
     
-    ao_class = knn(dist_ao[train_ix, c(1, 2)], dist_ao[-train_ix, c(1, 2)], dist_ao[train_ix, 3],
+    ao_class = knn(dist_ao[train_ix, c(1, 2)], 
+                   dist_ao[-train_ix, c(1, 2)], 
+                   dist_ao[train_ix, 3],
                    k = k_best)
 
     ao_results = table(dist_ao[-train_ix, 3], ao_class)
@@ -221,7 +229,7 @@ for (i in 1:n_sim) {
 #################################################################################################
 
 
-par(mfrow = c(1, 1))
+par(mfrow = c(1, 5))
 boxplot(sim_results$missclassPercSdo, main = 'SDO DistSpace', ylim = c(0.10, 0.25),
         ylab = '% Missclassification')
 # adjbox(sim_results$missclassPercSdo)
@@ -229,7 +237,7 @@ boxplot(sim_results$missclassPercAo, main = 'AO DistSpace', ylim = c(0.10, 0.25)
         ylab = '% Missclassification')
 boxplot(sim_results$missclassPercBd, main = 'BD DistSpace', ylim = c(0.10, 0.25),
         ylab = '% Missclassification')
-boxplot(sim_results$missclassPercDo, main = 'Do DistSpace', ylim = c(0.10, 0.25),
+boxplot(sim_results$missclassPercDo, main = 'DO DistSpace', ylim = c(0.10, 0.25),
         ylab = '% Missclassification')
 boxplot(sim_results$missclassPercKnn, main = 'Knn', ylim = c(0.10, 0.25),
         ylab = '% Missclassification')

@@ -1,0 +1,24 @@
+Package: mrfDepthLight
+Type: Package
+Version: 0.0.01
+Date: 2016-03-16
+Title: Part of the mrfDepth package to support the ROSPCA package
+Authors@R: c(
+            person(given="Mia",family="Hubert", role = c("aut")),
+            person(given="Peter",family="Rousseeuw", role = c("aut")),
+            person(given="Pieter",family="Segaert", role = c("aut", "cre"),email = "Pieter.Segaert@wis.kuleuven.be"),
+            person(given="Kaveh",family="Vakili", role = c("aut"))
+             )
+Depents: R (>= 3.0.0)
+Imports: matrixStats, ggplot2, geometry, grid, reshape2
+LinkingTo: Rcpp (>= 0.10.0), RcppEigen (>= 0.3.0.7.0)
+Description: A suit of wrapper for depth related computations.
+License: GPL (>= 2)
+LazyLoad: yes
+NeedsCompilation: yes
+Packaged: 2016-03-16 08:47:41 UTC; PieterSE
+Author: Mia Hubert [aut],
+  Peter Rousseeuw [aut],
+  Pieter Segaert [aut, cre],
+  Kaveh Vakili [aut]
+Maintainer: Pieter Segaert <Pieter.Segaert@wis.kuleuven.be>

@@ -1,0 +1,100 @@
+---
+title: "Dataset"
+author: "Akshat Dwivedi"
+date: "17 April 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(cache = TRUE, fig.width = 11)
+```
+
+# Tumor Marker Data
+
+Taken from [here](https://labs.genetics.ucla.edu/horvath/kidneypaper/RCC.htm).
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(readr)
+
+m = read_csv("/home/ad/Desktop/KUL Course Material/Robust Statistics/Project/Data/TutorialRCC366/testData_366.csv") %>% dplyr::select(-`NA`) %>% mutate(ClearCell = as.factor(ClearCell), event = as.factor(event))
+
+glimpse(m)
+```
+
+```{r}
+table(m$ClearCell) # G = 2, p = 8 (8 markers)
+```
+
+Two Groups: Clear and non-clear cell. So G = 2, p = 8 (8 different markers). In the example in the paper they've got (Banknote data from UCI as well, same as the tumor marker data) they have G = 2 and p = 4.
+
+```{r}
+pairs(formula = ~., data = m[,1:8], col = m$ClearCell)
+```
+
+Shows the plots for different marker values for different groups.
+
+# Motorins Data (package: faraway)
+
+```{r}
+library(faraway)
+data("motorins")
+
+str(motorins)
+```
+
+Shows the vairables in the dataset.
+
+```{r}
+pairs(formula = ~., data = motorins[,5:7], col = as.factor(motorins$Bonus), main = "Bonus")
+table(motorins$Bonus)
+```
+
+Shows skewed variables Insured, Claims and Payment at different levels of categorical var Bonus.
+
+```{r}
+pairs(formula = ~., data = motorins[,5:7], col = motorins$Kilometres, main = "Kilometers")
+```
+
+Same but with Kilometers.
+
+Could also just collapse the data into smaller groups by considering only two levels of one of the categorical variables instead of considering 5 or 7 levels.
+
+```{r}
+pairs(formula = ~., data = motorins[,5:7], col = motorins$Zone, main = "Zone")
+```
+
+```{r}
+pairs(formula = ~., data = motorins[,5:7], col = motorins$Make, main = "Make")
+```
+
+### Variable Description
+
+```
+A data frame with 1797 observations on the following 8 variables.
+
+Kilometres
+an ordered factor representing kilomoters per year with levels 1: < 1000, 2: 1000-15000, 3: 15000-20000, 4: 20000-25000, 5: > 25000
+
+Zone
+a factor representing geographical area with levels 1: Stockholm, Goteborg, Malmo with surroundings 2: Other large cities with surroundings 3: Smaller cities with surroundings in southern Sweden 4: Rural areas in southern Sweden 5: Smaller cities with surroundings in northern Sweden 6: Rural areas in northern Sweden 7: Gotland
+
+Bonus
+No claims bonus. Equal to the number of years, plus one, since last claim
+
+Make
+A factor representing eight different common car models. All other models are combined in class 9
+
+Insured
+Number of insured in policy-years
+
+Claims
+Number of claims
+
+Payment
+Total value of payments in Skr
+
+perd
+payment per claim
+```
