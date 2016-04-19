@@ -2,13 +2,20 @@ library(dplyr)
 library(ggplot2)
 library(readr)
 library(magrittr)
-
 library(mrfDepthLight)
 library(class)
 
 ## Function for simulation
 
 dist_space = function(data = hubert_data, method = "outlyingess") {
+  
+  # creating the training and test sets
+  train_ix = sample(length(hubert_data$employment), 0.8*length(hubert_data$employment))
+  train = hubert_data[train_ix,]
+  test = hubert_data[-train_ix,]
+  
+  grp0 = which(train$employment == 0)
+  grp1 = which(train$employment == 1)
   
   # converting the string to name object
   dist_method = as.name(method)

@@ -83,8 +83,10 @@ for (i in 1:n_sim) {
   train = hubert_data[train_ix,]
   test = hubert_data[-train_ix,]
   
-  grp0 = which(train$employment == 0)
-  grp1 = which(train$employment == 1)
+  
+  
+  grp0 = which(hubert_data$employment == 0)
+  grp1 = which(hubert_data$employment == 1)
   
   #################################################################################################
   ####################  SDO #######################################################################
@@ -127,6 +129,8 @@ for (i in 1:n_sim) {
     mutate(class = as.factor(class))
   
   #dist_sdo$class = c(rep(1, 500), rep(2, 500))
+  
+  
   
   #knn 
   
