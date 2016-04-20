@@ -4,6 +4,8 @@ library(readr)
 library(magrittr)
 library(mrfDepthLight)
 library(class)
+source('/home/ad/Desktop/KUL Course Material/Robust Statistics/Project/DO_code_clean.R')
+source('/home/ad/Desktop/KUL Course Material/Robust Statistics/Project/classificationcode.R')
 
 ## Hubert 2010 dataset (belgian national household 2005 survey)
 
@@ -26,7 +28,7 @@ glimpse(hubert_data)
 
 ## specifying the stuff for the simulation
 n_obs = dim(hubert_data)[1]
-n_sim = 2
+n_sim = 10
 
 data_results = data.frame(
   missclassSdo = rep(NA, n_sim), missclassPercSdo = rep(NA, n_sim), Sdo_k = rep(NA, n_sim),
@@ -45,22 +47,23 @@ dist_transform = function(transform.method = outlyingness) {
   # distance from unemployed to unemployed
   dist00 <- data.frame(
     distance = transform.method(hubert_data[grp0, -12], hubert_data[grp0, -12])$outlyingnessZ,
-                       class = 0)
+                       class = rep(0, nrow(hubert_data[grp0,]))
+    )
   
   # distance from employed to unemployed
   dist01 <- data.frame(
     distance = transform.method(hubert_data[grp0, -12], hubert_data[grp1, -12])$outlyingnessZ,
-                       class = 1)
+                       class = rep(1, nrow(hubert_data[grp1,])))
   
   # distance from unemployed to employed
   dist10 <- data.frame(
     distance = transform.method(hubert_data[grp1, -12], hubert_data[grp0, -12])$outlyingnessZ,
-                       class = 0)
+                       class = rep(0, nrow(hubert_data[grp0,])))
   
   # distance from employed to employed
   dist11 <- data.frame(
     distance = transform.method(hubert_data[grp1, -12], hubert_data[grp1, -12])$outlyingnessZ,
-                       class = 1)
+                       class = rep(1, nrow(hubert_data[grp1,])))
   
   dist0 = rbind(dist00, dist01)
   dist1 = rbind(dist10, dist11)
@@ -117,11 +120,11 @@ for (i in 1:n_sim) {
   
   # missclassifications
   missclassif_sdo = sdo_results[1, 2] + sdo_results[2, 1]
-  missclassif_sdo/length(test$class)
+  #missclassif_sdo/length(test$class)
   
-  sim_results[i, 'missclassSdo'] = missclassif_sdo
-  sim_results[i, 'missclassPercSdo'] = missclassif_sdo/length(test$class)    
-  sim_results[i, 'Sdo_k'] = k_best
+  data_results[i, 'missclassSdo'] = missclassif_sdo
+  data_results[i, 'missclassPercSdo'] = missclassif_sdo/length(test$class)    
+  data_results[i, 'Sdo_k'] = k_best
   
   #################################################################################################
   ####################  AO  #######################################################################
@@ -149,16 +152,37 @@ for (i in 1:n_sim) {
   
   # missclassifications
   missclassif_ao = ao_results[1, 2] + ao_results[2, 1]
-  missclassif_ao/length(test$class)
+  #missclassif_ao/length(test$class)
   
-  sim_results[i, 'missclassAo'] = missclassif_ao
-  sim_results[i, 'missclassPercAo'] = (missclassif_ao)/length(test$class)    
-  sim_results[i, 'Ao_k'] = k_best
+  data_results[i, 'missclassAo'] = missclassif_ao
+  data_results[i, 'missclassPercAo'] = (missclassif_ao)/length(test$class)    
+  data_results[i, 'Ao_k'] = k_best
   
   #################################################################################################
-  ####################  bag distance  #######################################################################
- 
-  dist_bd = dist_transform(transform.method = bagdistance)
+  ####################  bag distance  #############################################################
+  
+  #dist_bd = dist_transform(transform.method = bagdistance, element = bagdistance)
+  # this failed so doing it manually
+  
+  bd00 <- data.frame(
+    distance = bagdistance(hubert_data[grp0, -12], hubert_data[grp0, -12])$bagdistance, class = 0)
+  
+  bd01 <- data.frame(
+    distance = bagdistance(hubert_data[grp0, -12], hubert_data[grp1, -12])$bagdistance, class = 1)
+  
+  bd10 <- data.frame(
+    distance = bagdistance(hubert_data[grp1, -12], hubert_data[grp0, -12])$bagdistance, class = 0)
+  
+  bd11 <- data.frame(
+    distance = bagdistance(hubert_data[grp1, -12], hubert_data[grp1, -12])$bagdistance, class = 1)
+  
+  bd0 = rbind(bd00, bd01)
+  bd1 = rbind(bd10, bd11)
+  
+  dist_bd = data.frame(distG0 = bd0, distG1 = bd1) %>% 
+    dplyr::select(-distG1.class) %>% 
+    rename(class = distG0.class, distG0 = distG0.distance, distG1 = distG1.distance) %>%
+    mutate(class = as.factor(class)) 
   
   train = dist_bd[train_ix,]
   test = dist_bd[-train_ix,]
@@ -182,16 +206,40 @@ for (i in 1:n_sim) {
   
   # missclassifications
   missclassif_bd = bd_results[1, 2] + bd_results[2, 1]
-  missclassif_bd/length(test$class)
+  #missclassif_bd/length(test$class)
   
-  sim_results[i, 'missclassBd'] = missclassif_bd
-  sim_results[i, 'missclassPercBd'] = (missclassif_bd)/length(test$class)    
-  sim_results[i, 'Bd_k'] = k_best
+  data_results[i, 'missclassBd'] = missclassif_bd
+  data_results[i, 'missclassPercBd'] = (missclassif_bd)/length(test$class)    
+  data_results[i, 'Bd_k'] = k_best
   
   #################################################################################################
   ####################  DO   #######################################################################
   
-  dist_do = dist_transform(transform.method = DOclassif)
+  #dist_do = dist_transform(transform.method = DOclassif)
+  
+  do00 <- data.frame(
+    distance = DOclassif(data.matrix(hubert_data[grp0, -12]), data.matrix(hubert_data[grp0, -12])), 
+    class = 0)
+  
+  do01 <- data.frame(
+    distance = DOclassif(data.matrix(hubert_data[grp0, -12]), data.matrix(hubert_data[grp1, -12])), 
+    class = 1)
+  
+  do10 <- data.frame(
+    distance = DOclassif(data.matrix(hubert_data[grp1, -12]), data.matrix(hubert_data[grp0, -12])), 
+    class = 0)
+  
+  do11 <- data.frame(
+    distance = DOclassif(data.matrix(hubert_data[grp1, -12]), data.matrix(hubert_data[grp1, -12])), 
+    class = 1)
+  
+  do0 = rbind(do00, do01)
+  do1 = rbind(do10, do11)
+  
+  dist_do = data.frame(distG0 = do0, distG1 = do1) %>% 
+    dplyr::select(-distG1.class) %>% 
+    rename(class = distG0.class, distG0 = distG0.distance, distG1 = distG1.distance) %>%
+    mutate(class = as.factor(class)) 
   
   train = dist_do[train_ix,]
   test = dist_do[-train_ix,]
@@ -215,11 +263,11 @@ for (i in 1:n_sim) {
   
   # missclassifications
   missclassif_do = do_results[1, 2] + do_results[2, 1]
-  missclassif_do/length(test$class)
+  #missclassif_do/length(test$class)
   
-  sim_results[i, 'missclassDo'] = missclassif_do
-  sim_results[i, 'missclassPercDo'] = (missclassif_do)/length(test$class)    
-  sim_results[i, 'Do_k'] = k_best
+  data_results[i, 'missclassDo'] = missclassif_do
+  data_results[i, 'missclassPercDo'] = (missclassif_do)/length(test$class)    
+  data_results[i, 'Do_k'] = k_best
   
   #################################################################################################
   ###################### KNN  #####################################################################
@@ -231,31 +279,47 @@ for (i in 1:n_sim) {
   k <- 1:10
   
   for (x in k) {
-    prediction <- knn(train[,c(1,3)], test[,c(1,3)], train[,2], k = x)
-    accuracy[x] <- mean(prediction == test[, 2])
+    prediction <- knn(train[,-12], test[,-12], train[,12]$employment, k = x)
+    accuracy[x] <- mean(prediction == test[,12]$employment)
   }
   
   # plot(k, accuracy, type = 'b')
   
   k_best = which.max(accuracy)
   
-  knn_class = knn(train[,c(1,3)], test[,c(1,3)], train[,2], k = k_best)
+  knn_class = knn(train[,-12], test[,-12], train[,12]$employment, k = k_best)
   # summary(sdo_class)
   
-  knn_results = table(test[,2], knn_class)
+  knn_results = table(test[,12]$employment, knn_class)
   
   # missclassifications
   missclassif_knn = knn_results[1, 2] + knn_results[2, 1]
-  missclassif_knn/length(test$class)
+  #missclassif_knn/length(test$employment)
   
-  sim_results[i, 'missclassKnn'] = missclassif_knn
-  sim_results[i, 'missclassPercKnn'] = (missclassif_knn)/length(test$class)   
-  sim_results[i, 'Knn_k'] = k_best
+  data_results[i, 'missclassKnn'] = missclassif_knn
+  data_results[i, 'missclassPercKnn'] = (missclassif_knn)/length(test$employment)   
+  data_results[i, 'Knn_k'] = k_best
   
 }
 
-
+beepr::beep(3)
 #################################################################################################
 
+results = data_results %>% dplyr::select(contains("perc"))
+label_vec = c("SDO DistSpace", "BD DistSpace", "AO DistSpace", "DO DistSpace", "kNN")
 
-boxplot(data.frame(sim_results$missclassPercSdo, sim_results$missclassPercAo, sim_results$missclassPercBd, sim_results$missclassPercDo, sim_results$missclassPercKnn),names=c("SDO DistSpace","AO DistSpace", "BD DistSpace", "DO DistSpace", "kNN"), main="% Missclassification")
+par(mfrow = c(1,5))
+
+for (i in 1:5) {
+  boxplot(results[[i]])#, xlab = label_vec[i], ylab = "% Misclassification")
+  mtext(label_vec[i], side = 1, line = 1) #xlab
+  mtext("% Misclassification", side = 2, line = 2.4)
+}
+
+par(mfrow = c(1,1))
+
+title(main = "Misclassification % Using DistSpace Method", line = 2.3)
+
+# boxplot(
+#   data.frame(data_results$missclassPercSdo, data_results$missclassPercAo, data_results$missclassPercBd, data_results$missclassPercDo, data_results$missclassPercKnn),
+#  , main="% Missclassification")
