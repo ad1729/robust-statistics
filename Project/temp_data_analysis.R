@@ -26,9 +26,12 @@ hubert_data = rbind(employed, unemployed) %>% mutate(employment = as.factor(empl
 
 glimpse(hubert_data)
 
+## pairs plot for the variables
+pairs(formula = ~., data = hubert_data[,-12], col = hubert_data$employment)
+
 ## specifying the stuff for the simulation
 n_obs = dim(hubert_data)[1]
-n_sim = 10
+n_sim = 30 # 10
 
 data_results = data.frame(
   missclassSdo = rep(NA, n_sim), missclassPercSdo = rep(NA, n_sim), Sdo_k = rep(NA, n_sim),
@@ -306,19 +309,38 @@ beepr::beep(3)
 #################################################################################################
 
 results = data_results %>% dplyr::select(contains("perc"))
-label_vec = c("SDO DistSpace", "BD DistSpace", "AO DistSpace", "DO DistSpace", "kNN")
+label_vec = c("SDO", "BD", "AO", "DO", "kNN")
 
+## standard boxplots
 par(mfrow = c(1,5))
 
 for (i in 1:5) {
-  boxplot(results[[i]])#, xlab = label_vec[i], ylab = "% Misclassification")
-  mtext(label_vec[i], side = 1, line = 1) #xlab
-  mtext("% Misclassification", side = 2, line = 2.4)
+  boxplot(results[[i]], ylim = c(0.05, 0.25))
+  mtext(label_vec[i], side = 1, line = 1) # xlab
+  mtext("% Misclassification", side = 2, line = 2.4) # ylab
 }
 
 par(mfrow = c(1,1))
 
-title(main = "Misclassification % Using DistSpace Method", line = 2.3)
+title_text = paste("Misclassification % Using DistSpace Method (runs = ", n_sim, ")", sep = "", collapse = "")
+
+title(main = title_text, line = 2.6)
+
+## adjusted boxplots ( not different from the normal boxplot since the distributions are symmetric)
+## this can be checked by looking at the summary(results) which shows that the mean and median are roughly the same which is the case for symmetric distributions but not for skewed RVs
+par(mfrow = c(1,5))
+
+for (i in 1:5) {
+  robustbase::adjbox(x = results[[i]], ylim = c(0.05, 0.25))
+  mtext(label_vec[i], side = 1, line = 1) # xlab
+  mtext("% Misclassification", side = 2, line = 2.4) # ylab
+}
+
+par(mfrow = c(1,1))
+
+title_text = paste("Misclassification % Using DistSpace Method (runs = ", n_sim, ")", sep = "", collapse = "")
+
+title(main = title_text, line = 2.6)
 
 # boxplot(
 #   data.frame(data_results$missclassPercSdo, data_results$missclassPercAo, data_results$missclassPercBd, data_results$missclassPercDo, data_results$missclassPercKnn),
