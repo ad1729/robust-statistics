@@ -307,7 +307,7 @@ title_text = paste("Misclassification % Using DistSpace Method (runs = ", n_sim,
 
 title(main = title_text, line = 2.6)
 
-png(filename = "/home/ad/Desktop/KUL Course Material/Robust Statistics/Project/data_analysis_boxplots.png", width = 1000, height = 700)
+#png(filename = "/home/ad/Desktop/KUL Course Material/Robust Statistics/Project/data_analysis_boxplots.png", width = 1000, height = 700)
 
 ## summary of the results
 summary(results)
@@ -321,11 +321,11 @@ ggplot(dist_bd, aes(x = distG0, y = distG1)) +
   scale_shape_manual(name = "Group", labels = c("Unemployed", "Employed"), values = c(15,17)) +
   theme(legend.position = c(0.15, 0.80))# + xlim(0, 5) + ylim(0,4)
 
-png(filename = "/home/ad/Desktop/KUL Course Material/Robust Statistics/Project/distance_distance_plot.png", width = 1000, height = 700)
+#png(filename = "/home/ad/Desktop/KUL Course Material/Robust Statistics/Project/distance_distance_plot.png", width = 1000, height = 700)
 
 ## boxplots in one plot window
 boxplot(
    data.frame(data_results$misclassPercSdo, data_results$misclassPercAo, data_results$misclassPercBd, data_results$misclassPercDo, data_results$misclassPercKnn), main = "% Misclassification", 
    names = c("SDO DistSpace","AO DistSpace", "BD DistSpace", "DO DistSpace", "kNN"))
 
-png(filename = "/home/ad/Desktop/KUL Course Material/Robust Statistics/Project/boxplots_in_one.png", width = 900, height = 600)
+#png(filename = "/home/ad/Desktop/KUL Course Material/Robust Statistics/Project/boxplots_2000_runs.png", width = 900, height = 600)
