@@ -4,6 +4,8 @@ library(readr)
 library(magrittr)
 library(mrfDepthLight)
 library(class)
+library(klaR)
+library(e1071)
 source('/home/ad/Desktop/KUL Course Material/Robust Statistics/Project/DO_code_clean.R')
 source('/home/ad/Desktop/KUL Course Material/Robust Statistics/Project/classificationcode.R')
 
@@ -174,7 +176,9 @@ data_results = data.frame(
   misclassBd = rep(NA, n_sim), misclassPercBd = rep(NA, n_sim), Bd_k = rep(NA, n_sim),
   misclassAo = rep(NA, n_sim), misclassPercAo = rep(NA, n_sim), Ao_k = rep(NA, n_sim),
   misclassDo = rep(NA, n_sim), misclassPercDo = rep(NA, n_sim), Do_k = rep(NA, n_sim),
-  misclassKnn = rep(NA, n_sim), misclassPercKnn = rep(NA, n_sim), Knn_k = rep(NA, n_sim)
+  misclassKnn = rep(NA, n_sim), misclassPercKnn = rep(NA, n_sim), Knn_k = rep(NA, n_sim),
+  misclassQda = rep(NA, n_sim), misclassPercQda = rep(NA, n_sim),
+  misclassSvm = rep(NA, n_sim), misclassPercSvm = rep(NA, n_sim)
 )
 
 for (i in 1:n_sim) {  
@@ -281,6 +285,22 @@ for (i in 1:n_sim) {
   data_results[i, 'misclassPercKnn'] = (misclassif_knn)/length(test$employment)   
   data_results[i, 'Knn_k'] = k_best
   
+  ################### QDA ######################################################
+  qda_fit <- qda(employment ~ ., data = train)
+  qda_y = predict(qda_fit, newdata = test[,-12])$class
+  qda_res = table(test[,12], qda_y)
+  misclassQda = qda_res[1, 2] + qda_res[2, 1]
+  data_results[i, 'misclassQda'] = misclassQda
+  data_results[i, 'misclassPercQda'] = (misclassQda)/length(test$employment)   
+  
+  ################### SVM ######################################################
+  fit_svm = svm(employment ~ ., data = train, type = 'C-classification')
+  svm_y = predict(fit_svm, test[, -12])
+  svm_res = table(test[,12], svm_y)
+  misclassSvm = svm_res[1, 2] + svm_res[2, 1]
+  data_results[i, 'misclassSvm'] = misclassSvm
+  data_results[i, 'misclassPercSvm'] = (misclassSvm)/length(test$employment)
+  
 }
 
 beepr::beep(3)
@@ -289,13 +309,19 @@ beepr::beep(3)
 ## Plotting Results
 #####################################################################################################
 
+# results = data_results %>% dplyr::select(contains("perc"))
+# label_vec = c("SDO", "BD", "AO", "DO", "kNN")
+
 results = data_results %>% dplyr::select(contains("perc"))
-label_vec = c("SDO", "BD", "AO", "DO", "kNN")
+names(results) = c("SDO", "BD", "AO", "DO", "kNN", "QDA", "SVM")
+
+par(mfrow = c(1,1))
+boxplot(results, main = "% Misclassification")
 
 ## standard boxplots
 par(mfrow = c(1,5))
 
-for (i in 1:5) {
+for (i in 1:7) {
   boxplot(results[[i]], ylim = c(0.05, 0.25))
   mtext(label_vec[i], side = 1, line = 1) # xlab
   mtext("% Misclassification", side = 2, line = 2.4) # ylab
